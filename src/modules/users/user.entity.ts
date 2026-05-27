@@ -2,7 +2,7 @@ import { BaseEntity } from "@/common/entities/base.entity";
 import { UserRole } from "@/common/enums/roles.enum";
 import { Column, Entity, Index } from "typeorm";
 
-@Entity("users")
+@Entity("user")
 export class User extends BaseEntity {
     @Index({ unique: true })
     @Column({ length: 255 })
