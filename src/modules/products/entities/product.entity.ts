@@ -3,7 +3,7 @@ import { ProductCategory } from "@/common/enums/product-category.enum";
 import { ProductColor } from "@/modules/products/entities/product-color.entity";
 import { ProductSize } from "@/modules/products/entities/product-size.entity";
 import { ProductVariant } from "@/modules/products/entities/product-variant.entity";
-import { Column, Entity, Index, OneToMany } from "typeorm";
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from "typeorm";
 
 @Entity("product")
 export class Product extends BaseEntity {
@@ -23,14 +23,14 @@ export class Product extends BaseEntity {
         enum: ProductCategory
     })
     category: ProductCategory;
-    
+
     @Column({
         type: 'decimal',
         precision: 10,
         scale: 2
     })
     price: number;
-    
+
     @Column({
         name: 'old_price',
         type: 'decimal',
@@ -39,12 +39,12 @@ export class Product extends BaseEntity {
         nullable: true,
     })
     oldPrice: number;
-    
+
     @Column({
         type: 'text'
     })
     description: string;
-    
+
     @Index("idx_products_is_active")
     @Column({
         name: 'is_active',

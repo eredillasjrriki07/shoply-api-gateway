@@ -10,11 +10,16 @@ import { ProductSize } from "@/modules/products/entities/product-size.entity";
 import { ProductColor } from "@/modules/products/entities/product-color.entity";
 import { ProductVariant } from "@/modules/products/entities/product-variant.entity";
 import { ProductWithAggregates } from "@/modules/products/entities/product-with-aggregates.view";
+import { OrdersModule } from './modules/orders/orders.module';
+import { Order } from "@/modules/orders/entities/order.entity";
+import { OrderItem } from "@/modules/orders/entities/order-item.entity";
+import { OrderShippingAddress } from "@/modules/orders/entities/order-shipping-address.entity";
+import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
+import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-events.entity";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -30,7 +35,12 @@ import { ProductWithAggregates } from "@/modules/products/entities/product-with-
           ProductSize,
           ProductColor,
           ProductVariant,
-          ProductWithAggregates
+          ProductWithAggregates,
+          Order,
+          OrderItem,
+          OrderShippingAddress,
+          OrderPayment,
+          OrderTimelineEvent
         ],
         synchronize: false, // never true in production — use migrations
         charset: "utf8mb4_unicode_ci",
@@ -39,6 +49,7 @@ import { ProductWithAggregates } from "@/modules/products/entities/product-with-
     AuthModule,
     UsersModule,
     ProductsModule,
+    OrdersModule,
   ],
 })
 export class AppModule { }

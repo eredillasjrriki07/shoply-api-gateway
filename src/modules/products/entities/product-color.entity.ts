@@ -1,6 +1,6 @@
 import { BaseEntity } from "@/common/entities/base.entity";
 import { Product } from "@/modules/products/entities/product.entity";
-import { Column, Entity, JoinColumn, ManyToOne, Unique } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 
 @Entity('product_color')
 @Unique('uq_color', ['productId', 'value'])
@@ -14,7 +14,7 @@ export class ProductColor extends BaseEntity {
     @ManyToOne(() => Product, (product) => product.colors, {
         onDelete: 'CASCADE'
     })
-    @JoinColumn({name: 'product_id'})
+    @JoinColumn({ name: 'product_id' })
     product: Product;
 
     @Column({

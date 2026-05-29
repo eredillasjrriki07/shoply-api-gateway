@@ -1,6 +1,7 @@
 import { BaseEntity } from "@/common/entities/base.entity";
 import { UserRole } from "@/common/enums/roles.enum";
-import { Column, Entity, Index } from "typeorm";
+import { Order } from "@/modules/orders/entities/order.entity";
+import { Column, Entity, Index, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("user")
 export class User extends BaseEntity {
@@ -41,4 +42,8 @@ export class User extends BaseEntity {
         nullable: true
     })
     lastLoginAt?: Date | null;
+
+    // Relations
+    @OneToMany(() => Order, (order) => order.user)
+    orders: Order[];
 }
