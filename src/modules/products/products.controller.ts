@@ -1,8 +1,9 @@
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt.guard';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ProductFilterDto } from '@/modules/products/dto/product-filter.dto';
+import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { ProductsService } from '@/modules/products/products.service';
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 
 @Controller('products')
 @UseGuards(JwtAuthGuard)
@@ -27,5 +28,11 @@ export class ProductsController {
     @HttpCode(HttpStatus.CREATED)
     async create(@Body() createProductDto: CreateProductDto) {
         return await this.productService.createProduct(createProductDto);
+    }
+
+    @Patch('update/:id')
+    @HttpCode(HttpStatus.OK)
+    async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
+        return await this.productService.updateProduct(id, updateProductDto);
     }
 }

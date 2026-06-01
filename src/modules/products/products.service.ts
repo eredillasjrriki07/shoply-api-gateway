@@ -1,6 +1,7 @@
 import { STATUS_FILTERS } from '@/common/util/helper';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ProductFilterDto } from '@/modules/products/dto/product-filter.dto';
+import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { ProductColor } from '@/modules/products/entities/product-color.entity';
 import { ProductSize } from '@/modules/products/entities/product-size.entity';
 import { ProductVariant } from '@/modules/products/entities/product-variant.entity';
@@ -102,6 +103,16 @@ export class ProductsService {
         });
 
         return createdProduct;
+    }
+
+    async updateProduct(id: string, updateProductDto: UpdateProductDto) {
+        const result = await this.productRepo.update(id, updateProductDto);
+
+        if (result.affected === 0) {
+            throw new NotFoundException(`Product with id ${id} not found.`);
+        }
+
+        return this.productRepo.findOneBy({ id });
     }
 
     private getTransactionByPage(data, page: number) {
