@@ -16,6 +16,7 @@ import { OrderItem } from "@/modules/orders/entities/order-item.entity";
 import { OrderShippingAddress } from "@/modules/orders/entities/order-shipping-address.entity";
 import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
 import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-events.entity";
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-eve
     UsersModule,
     ProductsModule,
     OrdersModule,
+    ReviewsModule,
   ],
 })
 export class AppModule { }

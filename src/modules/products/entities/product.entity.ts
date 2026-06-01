@@ -3,6 +3,7 @@ import { ProductCategory } from "@/common/enums/product-category.enum";
 import { ProductColor } from "@/modules/products/entities/product-color.entity";
 import { ProductSize } from "@/modules/products/entities/product-size.entity";
 import { ProductVariant } from "@/modules/products/entities/product-variant.entity";
+import { Review } from "@/modules/reviews/review.entity";
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from "typeorm";
 
 @Entity("product")
@@ -61,4 +62,7 @@ export class Product extends BaseEntity {
 
     @OneToMany(() => ProductVariant, (productVariant) => productVariant.product)
     productVariants: ProductVariant[];
+
+    @OneToMany(() => Review, (review) => review.product)
+    reviews: Review[];
 };
