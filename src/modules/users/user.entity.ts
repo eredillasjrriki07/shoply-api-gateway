@@ -1,6 +1,7 @@
 import { BaseEntity } from "@/common/entities/base.entity";
 import { UserRole } from "@/common/enums/roles.enum";
 import { Order } from "@/modules/orders/entities/order.entity";
+import { Review } from "@/modules/reviews/review.entity";
 import { Column, Entity, Index, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("user")
@@ -46,4 +47,7 @@ export class User extends BaseEntity {
     // Relations
     @OneToMany(() => Order, (order) => order.user)
     orders: Order[];
+
+    @OneToMany (() => Review, (review) => review.user)
+    reviews: Review[];
 }

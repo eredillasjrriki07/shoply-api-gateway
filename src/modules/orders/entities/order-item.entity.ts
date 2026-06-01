@@ -1,7 +1,8 @@
 import { BaseEntity } from "@/common/entities/base.entity";
 import { Order } from "@/modules/orders/entities/order.entity";
 import { ProductVariant } from "@/modules/products/entities/product-variant.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Review } from "@/modules/reviews/review.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 
 @Entity('order_item')
 export class OrderItem extends BaseEntity {
@@ -68,6 +69,4 @@ export class OrderItem extends BaseEntity {
     })
     @JoinColumn({ name: 'order_id' })
     order: Order;
-
-
 }
