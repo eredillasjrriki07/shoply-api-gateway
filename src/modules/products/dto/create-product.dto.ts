@@ -45,13 +45,13 @@ export class CreateProductDto {
     @IsArray()
     @ValidateNested()
     @Type(() => ProductSizeDto)
-    sizes: ProductSize[];
+    sizes: ProductSizeDto[];
 
     @IsOptional()
     @IsArray()
     @ValidateNested()
     @Type(() => ProductColorDto)
-    colors: ProductColor[];
+    colors: ProductColorDto[];
 
     @IsArray()
     @ValidateNested()

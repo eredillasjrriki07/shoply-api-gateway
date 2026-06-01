@@ -1,11 +1,11 @@
 import { BaseEntity } from "@/common/entities/base.entity";
 import { Product } from "@/modules/products/entities/product.entity";
-import { Column, Entity, JoinColumn, ManyToOne, Unique } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Unique } from "typeorm";
 
 @Entity('product_variant')
 @Unique('uq_variant_sku', ['sku'])
 @Unique('uq_variant', ['productId', 'size', 'color'])
-export class  ProductVariant extends BaseEntity {
+export class ProductVariant extends BaseEntity {
     @Column({
         name: 'product_id',
         length: 36,
