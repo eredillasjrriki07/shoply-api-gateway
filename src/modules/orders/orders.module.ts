@@ -7,6 +7,7 @@ import { OrderItem } from '@/modules/orders/entities/order-item.entity';
 import { OrderPayment } from '@/modules/orders/entities/order-payment.entity';
 import { OrderShippingAddress } from '@/modules/orders/entities/order-shipping-address.entity';
 import { OrderTimelineEvent } from '@/modules/orders/entities/order-timeline-events.entity';
+import { OrderWithAggregates } from '@/modules/orders/entities/order-with-aggregates.view';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { OrderTimelineEvent } from '@/modules/orders/entities/order-timeline-eve
       OrderItem,
       OrderShippingAddress,
       OrderPayment,
-      OrderTimelineEvent 
+      OrderTimelineEvent,
+      OrderWithAggregates
     ])
   ],
   controllers: [OrdersController],
