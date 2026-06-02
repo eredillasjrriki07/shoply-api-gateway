@@ -1,3 +1,5 @@
+import { OrderEventType } from "@/common/enums/order-event-type.enum";
+import { OrderStatus } from "@/common/enums/order-status.enum";
 import { ProductStatus } from "@/common/enums/product-status.enum";
 import { LessThanOrEqual, MoreThan } from "typeorm";
 
@@ -6,3 +8,19 @@ export const STATUS_FILTERS = {
     [ProductStatus.LOW]: LessThanOrEqual(5),
     [ProductStatus.OUT_OF_STOCK]: 0,
 };
+
+export const statusMap = {
+    [OrderEventType.PLACED]: OrderStatus.PLACED,
+    [OrderEventType.TO_SHIP]: OrderStatus.TO_SHIP,
+    [OrderEventType.CANCELLED]: OrderStatus.CANCELLED,
+    [OrderEventType.SHIPPED]: OrderStatus.TO_RECEIVE,
+    [OrderEventType.DELIVERED]: OrderStatus.COMPLETED,
+    [OrderEventType.RETURN_REFUND]: OrderStatus.RETURN_OR_REFUND,
+};
+
+export const getTransactionByPage = (data, page: number) => {
+    const pageLimit = 10;
+    let start = (page - 1) * pageLimit;
+    let end = start + pageLimit;
+    return data.slice(start, end);
+}

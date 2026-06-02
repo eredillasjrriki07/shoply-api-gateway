@@ -1,24 +1,59 @@
 import { OrderEventType } from '@/common/enums/order-event-type.enum';
 import { OrderStatus } from '@/common/enums/order-status.enum';
 import { PaymentStatus } from '@/common/enums/payment-status.enum';
+import { filterByDateRange } from '@/common/util/filter-by-date-range.util';
+import { getTransactionByPage, statusMap } from '@/common/util/helper';
 import { CreateOrderDto } from '@/modules/orders/dto/create-order.dto';
+import { OrderFilterDto } from '@/modules/orders/dto/order-filter.dto';
 import { OrderItem } from '@/modules/orders/entities/order-item.entity';
 import { OrderPayment } from '@/modules/orders/entities/order-payment.entity';
 import { OrderShippingAddress } from '@/modules/orders/entities/order-shipping-address.entity';
 import { OrderTimelineEvent } from '@/modules/orders/entities/order-timeline-events.entity';
+import { OrderWithAggregates } from '@/modules/orders/entities/order-with-aggregates.view';
 import { Order } from '@/modules/orders/entities/order.entity';
 import { ProductVariant } from '@/modules/products/entities/product-variant.entity';
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, MoreThan, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, In, Repository } from 'typeorm';
 
 @Injectable()
 export class OrdersService {
     constructor(
+        @InjectRepository(OrderWithAggregates)
+        private readonly orderView: Repository<OrderWithAggregates>,
         @InjectRepository(Order)
         private readonly orderRepo: Repository<Order>,
         private readonly dataSource: DataSource
     ) { }
+
+    async getOrders(orderFilterDto: OrderFilterDto) {
+        console.log(orderFilterDto);
+        const where: FindOptionsWhere<OrderWithAggregates> = {};
+
+        // Setting filters
+        const dateFilter = filterByDateRange(orderFilterDto.fromDate, orderFilterDto.toDate);
+        if (dateFilter) where.date = dateFilter;
+        if (orderFilterDto.status) where.status = orderFilterDto.status;
+
+        const orderViewResults = await this.orderView.find({ where });
+
+        const orders = getTransactionByPage(orderViewResults, orderFilterDto.page!);
+
+        return { page: orderFilterDto.page, orders };
+    }
+
+    async getOrder(orderNumber: string) {
+        const order = await this.orderRepo.findOne({
+            where: { orderNumber },
+            relations: { orderItems: true, orderShippingAddress: true, orderPayment: true, orderTimelineEvents: true }
+        });
+
+        if (!order) {
+            throw new NotFoundException(`Order with number ${orderNumber} not found!`);
+        }
+
+        return order;
+    }
 
     async createOrder(createOrderDto: CreateOrderDto) {
         return this.dataSource.transaction(async (manager) => {
@@ -68,7 +103,7 @@ export class OrdersService {
             // 4. Create the order
             const order = await manager.save(Order, {
                 userId: createOrderDto.userId,
-                status: OrderStatus.TO_SHIP,
+                status: OrderStatus.PLACED,
                 subtotal: subtotal,
                 shippingFee: createOrderDto.shippingFee,
                 tax: 0
@@ -104,6 +139,29 @@ export class OrdersService {
             });
 
             return order;
+        });
+    }
+
+    async updateOrderTimeline(orderId: number, eventType: OrderEventType) {
+        //  await manager.update(Order, id, { status: OrderStatus.SHIPPED });
+        return this.dataSource.transaction(async (manager) => {
+            const order = await manager.findOneBy(Order, { id: orderId });
+            if (!order) throw new NotFoundException(`Order with id ${orderId} not found!`);
+
+            // Update order
+            await manager.update(Order, orderId, { status: statusMap[eventType] });
+
+            // Add order timeline event
+            await manager.save(OrderTimelineEvent, {
+                orderId,
+                eventType,
+            });
+
+            // Return the updated order
+            return manager.findOne(Order, {
+                where: { id: orderId },
+                relations: { orderItems: true, orderShippingAddress: true, orderPayment: true, orderTimelineEvents: true }
+            });
         });
     }
 }

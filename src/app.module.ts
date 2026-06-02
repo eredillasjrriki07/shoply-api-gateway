@@ -18,6 +18,7 @@ import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
 import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-events.entity";
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { Review } from "@/modules/reviews/review.entity";
+import { OrderWithAggregates } from "@/modules/orders/entities/order-with-aggregates.view";
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { Review } from "@/modules/reviews/review.entity";
           OrderShippingAddress,
           OrderPayment,
           OrderTimelineEvent,
+          OrderWithAggregates,
           Review
         ],
         synchronize: false, // never true in production — use migrations
