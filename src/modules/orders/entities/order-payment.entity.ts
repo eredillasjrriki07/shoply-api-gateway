@@ -20,6 +20,14 @@ export class OrderPayment extends BaseEntity {
     method: PaymentMethod
 
     @Column({
+        name: 'checkout_session_id',
+        type: 'varchar',
+        length: 100,
+        nullable: true
+    })
+    checkoutSessionId: string | null;
+
+    @Column({
         type: 'enum',
         enum: PaymentStatus,
         default: PaymentStatus.PENDING

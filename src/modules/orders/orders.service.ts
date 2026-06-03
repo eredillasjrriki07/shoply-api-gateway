@@ -12,6 +12,7 @@ import { OrderTimelineEvent } from '@/modules/orders/entities/order-timeline-eve
 import { OrderWithAggregates } from '@/modules/orders/entities/order-with-aggregates.view';
 import { Order } from '@/modules/orders/entities/order.entity';
 import { ProductVariant } from '@/modules/products/entities/product-variant.entity';
+import { StripeService } from '@/modules/stripe/stripe.service';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindOptionsWhere, In, Repository } from 'typeorm';
@@ -19,15 +20,14 @@ import { DataSource, FindOptionsWhere, In, Repository } from 'typeorm';
 @Injectable()
 export class OrdersService {
     constructor(
-        @InjectRepository(OrderWithAggregates)
-        private readonly orderView: Repository<OrderWithAggregates>,
-        @InjectRepository(Order)
-        private readonly orderRepo: Repository<Order>,
-        private readonly dataSource: DataSource
+        @InjectRepository(OrderWithAggregates) private readonly orderView: Repository<OrderWithAggregates>,
+        @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+        @InjectRepository(OrderPayment) private readonly orderPaymentRepo: Repository<OrderPayment>,
+        private readonly dataSource: DataSource,
+        private readonly stripeService: StripeService
     ) { }
 
     async getOrders(orderFilterDto: OrderFilterDto) {
-        console.log(orderFilterDto);
         const where: FindOptionsWhere<OrderWithAggregates> = {};
 
         // Setting filters
@@ -163,5 +163,45 @@ export class OrdersService {
                 relations: { orderItems: true, orderShippingAddress: true, orderPayment: true, orderTimelineEvents: true }
             });
         });
+    }
+
+    async markAsPaid(orderId: number, total: number, paymentRef: string) {
+        await this.orderPaymentRepo.update(
+            { orderId },
+            {
+                status: PaymentStatus.PAID,
+                amount: total,
+                providerRef: paymentRef,
+                paidAt: new Date()
+            }
+        );
+    }
+
+    async checkout(orderId: number) {
+        const order = await this.orderRepo.findOne({
+            where: { id: orderId },
+            relations: { orderItems: true, orderPayment: true }
+        });
+
+        if (!order) {
+            throw new NotFoundException(`Order with id ${orderId} not found!`);
+        }
+
+        const orderPayment = order.orderPayment;
+
+        if (orderPayment.status !== PaymentStatus.PENDING) {
+            throw new BadRequestException(`Cannot checkout: order is ${order.status.toUpperCase()} with payment status ${orderPayment.status.toUpperCase()}`);
+        }
+
+        if (orderPayment.checkoutSessionId) {
+            return await this.stripeService.resumeCheckoutSession(orderPayment.checkoutSessionId);
+        }
+
+        const session = await this.stripeService.createCheckoutSession(order.id, order.orderItems, order.total);
+
+        // Update OrderPayment checkout session id
+        await this.orderPaymentRepo.update({ orderId }, { checkoutSessionId: session.id });
+
+        return { url: session.url };
     }
 }
