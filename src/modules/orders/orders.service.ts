@@ -165,15 +165,10 @@ export class OrdersService {
         });
     }
 
-    async markAsPaid(orderId: number, total: number, paymentRef: string) {
+    async updateOrderPayment(whereOptions: FindOptionsWhere<OrderPayment>, updateOptions: Partial<OrderPayment>) {
         await this.orderPaymentRepo.update(
-            { orderId },
-            {
-                status: PaymentStatus.PAID,
-                amount: total,
-                providerRef: paymentRef,
-                paidAt: new Date()
-            }
+            whereOptions,
+            updateOptions
         );
     }
 
@@ -203,5 +198,29 @@ export class OrdersService {
         await this.orderPaymentRepo.update({ orderId }, { checkoutSessionId: session.id });
 
         return { url: session.url };
+    }
+
+    async refund(orderId: number) {
+        const order = await this.orderRepo.findOne({
+            where: { id: orderId },
+            relations: { orderPayment: true }
+        });
+
+        if (!order) {
+            throw new NotFoundException(`Order with id ${orderId} not found!`);
+        }
+
+        const orderPayment = order.orderPayment;
+        // order.status !== OrderStatus.RETURN_OR_REFUND && 
+        if (orderPayment.status !== PaymentStatus.PAID) {
+            throw new BadRequestException(`Cannot refund: order is ${order.status.toUpperCase()} with payment status ${orderPayment.status.toUpperCase()}`);
+        }
+
+        // Update OrderPayment checkout session id
+        await this.orderPaymentRepo.update({ orderId }, { status: PaymentStatus.REFUND_PENDING });
+
+        const refundAmount = orderPayment.amount - order.shippingFee;
+
+        return await this.stripeService.createRefundSession(order.id, orderPayment.providerRef, refundAmount);
     }
 }
