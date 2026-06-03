@@ -4,7 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from '@/common/interceptor/transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   app.setGlobalPrefix('api');
   app.enableCors();

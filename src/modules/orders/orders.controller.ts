@@ -3,13 +3,15 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt.guard';
 import { CreateOrderDto } from '@/modules/orders/dto/create-order.dto';
 import { OrderFilterDto } from '@/modules/orders/dto/order-filter.dto';
 import { OrdersService } from '@/modules/orders/orders.service';
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { StripeService } from '@/modules/stripe/stripe.service';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import type { Checkout } from 'stripe';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
 export class OrdersController {
     constructor(
-        private readonly orderService: OrdersService
+        private readonly orderService: OrdersService,
     ) { }
 
     @Get()
@@ -54,5 +56,10 @@ export class OrdersController {
     @Post(':orderId/return')
     async return(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.updateOrderTimeline(orderId, OrderEventType.RETURN_REFUND);
+    }
+
+    @Post('checkout/:orderId')
+    async checkout(@Param('orderId', ParseIntPipe) orderId: number) {
+        return await this.orderService.checkout(orderId);
     }
 }

@@ -19,6 +19,8 @@ import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-eve
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { Review } from "@/modules/reviews/review.entity";
 import { OrderWithAggregates } from "@/modules/orders/entities/order-with-aggregates.view";
+import { StripeModule } from './modules/stripe/stripe.module';
+import { StripeController } from './modules/stripe/stripe.controller';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { OrderWithAggregates } from "@/modules/orders/entities/order-with-aggreg
     ProductsModule,
     OrdersModule,
     ReviewsModule,
+    StripeModule.forRoot(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-05-27.dahlia' }),
   ],
+  controllers: [StripeController],
 })
 export class AppModule { }
