@@ -1,11 +1,8 @@
 import { CreateOrderItemDto } from "@/modules/orders/dto/create-order-item.dto";
 import { CreateOrderPaymentDto } from "@/modules/orders/dto/create-order-payment.dto";
 import { CreateOrderShippingAddressDto } from "@/modules/orders/dto/create-order-shipping-address.dto";
-import { OrderItem } from "@/modules/orders/entities/order-item.entity";
-import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
-import { OrderShippingAddress } from "@/modules/orders/entities/order-shipping-address.entity";
 import { Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsUUID, Min, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsOptional, IsUUID, MaxLength, Min, ValidateNested } from "class-validator";
 
 export class CreateOrderDto {
     @IsNotEmpty()
@@ -29,4 +26,8 @@ export class CreateOrderDto {
     @ValidateNested()
     @Type(() => CreateOrderPaymentDto)
     payment: CreateOrderPaymentDto;
+
+    @IsOptional()
+    @IsUUID()
+    promoId: string;
 }

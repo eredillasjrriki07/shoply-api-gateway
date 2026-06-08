@@ -3,6 +3,6 @@ export enum PaymentStatus {
     AUTHORIZED = 'Authorized',
     PAID = 'Paid',
     FAILED = 'Failed',
-    REFUND_PENDING = 'Refund_pending',
+    REFUND_PENDING = 'Refund pending',
     REFUNDED = 'Refunded'
 }

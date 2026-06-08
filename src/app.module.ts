@@ -21,6 +21,8 @@ import { Review } from "@/modules/reviews/review.entity";
 import { OrderWithAggregates } from "@/modules/orders/entities/order-with-aggregates.view";
 import { StripeModule } from './modules/stripe/stripe.module';
 import { StripeController } from './modules/stripe/stripe.controller';
+import { PromosModule } from './modules/promos/promos.module';
+import { Promo } from "./modules/promos/promo.entity";
 
 @Module({
   imports: [
@@ -47,7 +49,8 @@ import { StripeController } from './modules/stripe/stripe.controller';
           OrderPayment,
           OrderTimelineEvent,
           OrderWithAggregates,
-          Review
+          Review,
+          Promo
         ],
         synchronize: false, // never true in production — use migrations
         charset: "utf8mb4_unicode_ci",
@@ -59,6 +62,7 @@ import { StripeController } from './modules/stripe/stripe.controller';
     OrdersModule,
     ReviewsModule,
     StripeModule.forRoot(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-05-27.dahlia' }),
+    PromosModule,
   ],
   controllers: [StripeController],
 })
