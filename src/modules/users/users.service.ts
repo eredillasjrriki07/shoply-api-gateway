@@ -1,9 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import * as bcrypt from "bcrypt";
+import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UsersService {
     constructor(
@@ -26,12 +27,27 @@ export class UsersService {
         return this.userRepo.save(user);
     }
 
-    async findByEmail(email: string) {
-        return this.userRepo.findOne({ where: { email } });
+    async updateUser(id: string, updateUserDto: UpdateUserDto) {
+        const result = await this.userRepo.update(id, updateUserDto);
+
+        if (result.affected === 0) throw new NotFoundException(`User with id ${id} not found.`);
+
+        return this.userRepo.findOneBy({ id });
     }
 
     async findById(id: string) {
-        return this.userRepo.findOne({ where: { id } });
+        const user = await this.userRepo.findOne({
+            where: { id },
+            relations: { orders: true, reviews: true }
+        });
+
+        if (!user) throw new NotFoundException(`User with id ${id} not found.`);
+
+        return user;
+    }
+
+    async findByEmail(email: string) {
+        return this.userRepo.findOne({ where: { email } });
     }
 
     async updateLastLogin(id: string) {
