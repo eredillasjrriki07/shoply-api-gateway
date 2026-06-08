@@ -1,9 +1,9 @@
-import { BaseEntity } from "@/common/entities/base.entity";
 import { OrderStatus } from "@/common/enums/order-status.enum";
 import { OrderItem } from "@/modules/orders/entities/order-item.entity";
 import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
 import { OrderShippingAddress } from "@/modules/orders/entities/order-shipping-address.entity";
 import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-events.entity";
+import { Promo } from "@/modules/promos/promo.entity";
 import { User } from "@/modules/users/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -58,6 +58,12 @@ export class Order {
     tax: number;
 
     @Column({
+        name: 'promo_id',
+        length: 36
+    })
+    promoId: string;
+
+    @Column({
         type: 'decimal',
         precision: 10,
         scale: 2,
@@ -88,4 +94,8 @@ export class Order {
 
     @OneToMany(() => OrderTimelineEvent, (orderTimelineEvent) => orderTimelineEvent.order)
     orderTimelineEvents: OrderTimelineEvent[];
+
+    @ManyToOne(() => Promo, (promo) => promo.orders)
+    @JoinColumn({ name: 'promo_id' })
+    promo: Promo;
 }

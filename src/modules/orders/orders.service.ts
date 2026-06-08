@@ -106,7 +106,8 @@ export class OrdersService {
                 status: OrderStatus.PLACED,
                 subtotal: subtotal,
                 shippingFee: createOrderDto.shippingFee,
-                tax: 0
+                tax: 0,
+                promoId: createOrderDto.promoId
             });
 
             // Set order number
