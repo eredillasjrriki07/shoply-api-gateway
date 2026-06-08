@@ -1,5 +1,5 @@
 import { OrderItem } from '@/modules/orders/entities/order-item.entity';
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -39,8 +39,19 @@ export class StripeService {
         if (session.status === 'open' && session.url) {
             return { url: session.url }
         }
-        
+
         throw new InternalServerErrorException('Unknown error has occured on resuming checkout_session_id!');
+    }
+
+    async createRefundSession(orderId: number, paymentRef: string, amount: number) {
+        return await this.stripe.refunds.create({
+            payment_intent: paymentRef,
+            amount: Math.round(amount * 100),
+            metadata: {
+                orderId: orderId.toString(),
+                amountRefunded: amount.toString(),
+            }
+        });
     }
 
     verifyWebhook(rawBody: Buffer, signature: string) {

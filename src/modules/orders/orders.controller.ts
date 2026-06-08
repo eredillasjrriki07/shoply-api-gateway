@@ -62,4 +62,9 @@ export class OrdersController {
     async checkout(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.checkout(orderId);
     }
+
+    @Post('refund/:orderId')
+    async refund(@Param('orderId', ParseIntPipe) orderId: number) {
+        return await this.orderService.refund(orderId);
+    }
 }

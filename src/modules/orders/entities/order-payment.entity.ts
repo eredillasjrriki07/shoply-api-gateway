@@ -51,6 +51,15 @@ export class OrderPayment extends BaseEntity {
     amount: number;
 
     @Column({
+        name: 'amount_refunded',
+        type: 'decimal',
+        precision: 10,
+        scale: 2,
+        nullable: true
+    })
+    amountRefunded: number;
+
+    @Column({
         name: 'paid_at',
         type: 'datetime',
         nullable: true
