@@ -59,9 +59,10 @@ export class Order {
 
     @Column({
         name: 'promo_id',
-        length: 36
+        length: 36,
+        nullable: true,
     })
-    promoId: string;
+    promoId?: string;
 
     @Column({
         type: 'decimal',

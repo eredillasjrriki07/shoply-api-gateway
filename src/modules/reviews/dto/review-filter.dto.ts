@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsUUID } from "class-validator";
 
-export class GetReviewDto {
+export class ReviewFilterDto {
     @IsNotEmpty()
     @IsUUID()
     productId: string;

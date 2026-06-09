@@ -29,5 +29,5 @@ export class CreateOrderDto {
 
     @IsOptional()
     @IsUUID()
-    promoId: string;
+    promoId?: string;
 }

@@ -1,4 +1,4 @@
-import { GetReviewDto } from '@/modules/reviews/dto/get-review.dto';
+import { ReviewFilterDto } from '@/modules/reviews/dto/review-filter.dto';
 import { Review } from '@/modules/reviews/review.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +11,7 @@ export class ReviewsService {
         private readonly reviewRepo: Repository<Review>
     ) { }
 
-    async getProductReviews(getReviewDto: GetReviewDto) {
+    async getProductReviews(getReviewDto: ReviewFilterDto) {
         const { productId, userId, orderItemId } = getReviewDto;
         const where: FindOptionsWhere<Review> = { productId };
 
