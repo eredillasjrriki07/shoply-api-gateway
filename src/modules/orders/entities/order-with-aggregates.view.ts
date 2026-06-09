@@ -1,3 +1,4 @@
+import { numericTransformer } from "@/common/util/helper";
 import { ViewColumn, ViewEntity } from "typeorm";
 
 @ViewEntity('orders_with_aggregates')
@@ -23,6 +24,6 @@ export class OrderWithAggregates {
     @ViewColumn({ name: 'total_items' })
     items: number;
 
-    @ViewColumn()
+    @ViewColumn({ transformer: numericTransformer })
     total: number;
 }

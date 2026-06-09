@@ -1,4 +1,5 @@
-import { getTransactionByPage, sortBy, STATUS_FILTERS } from '@/common/util/helper';
+import { constants } from '@/common/util/constants';
+import { STATUS_FILTERS } from '@/common/util/helper';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ProductFilterDto } from '@/modules/products/dto/product-filter.dto';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
@@ -29,9 +30,12 @@ export class ProductsService {
         if (productFilterDto.category) where.category = productFilterDto.category;
         if (productFilterDto.status) where.totalStock = STATUS_FILTERS[productFilterDto.status]
 
-        const result = await this.productsView.find({ where });
-
-        const products = sortBy(getTransactionByPage(result, productFilterDto.page!), 'name', 'asc');
+        const products = await this.productsView.find({
+            where,
+            order: { createdAt: 'desc' },
+            skip: (productFilterDto.page! - 1) * constants.PAGE_LIMIT,
+            take: constants.PAGE_LIMIT,
+        });
 
         const response = { page: productFilterDto.page, products };
 
