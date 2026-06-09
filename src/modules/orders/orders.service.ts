@@ -1,8 +1,9 @@
 import { OrderEventType } from '@/common/enums/order-event-type.enum';
 import { OrderStatus } from '@/common/enums/order-status.enum';
 import { PaymentStatus } from '@/common/enums/payment-status.enum';
+import { constants } from '@/common/util/constants';
 import { filterByDateRange } from '@/common/util/filter-by-date-range.util';
-import { getSumAndCount, getTransactionByPage, sortBy, statusMap } from '@/common/util/helper';
+import { statusMap } from '@/common/util/helper';
 import { CreateOrderDto } from '@/modules/orders/dto/create-order.dto';
 import { OrderFilterDto } from '@/modules/orders/dto/order-filter.dto';
 import { OrderItem } from '@/modules/orders/entities/order-item.entity';
@@ -35,15 +36,21 @@ export class OrdersService {
         if (dateFilter) where.date = dateFilter;
         if (orderFilterDto.status) where.status = orderFilterDto.status;
 
-        const orderViewResults = await this.orderView.find({ where });
+        const count = await this.orderView.count();
 
-        let sumAndCount = getSumAndCount(orderViewResults);
+        const { total } = await this.orderView.createQueryBuilder('o').select('SUM(o.total)', 'total').getRawOne();
 
-        const orders = sortBy(getTransactionByPage(orderViewResults, orderFilterDto.page!), 'date');
+        const orders = await this.orderView.find({
+            where,
+            order: { date: 'desc' },
+            skip: (orderFilterDto.page! - 1) * constants.PAGE_LIMIT,
+            take: constants.PAGE_LIMIT,
+        });
 
         return {
             page: orderFilterDto.page,
-            ...sumAndCount,
+            count,
+            total: Number(total),
             orders
         };
     }

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
@@ -6,8 +6,8 @@ import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import * as bcrypt from "bcrypt";
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
-import { getTransactionByPage, sortBy } from '@/common/util/helper';
 import { CustomersView } from './entities/customers.view';
+import { constants } from '@/common/util/constants';
 @Injectable()
 export class UsersService {
     constructor(
@@ -23,11 +23,16 @@ export class UsersService {
 
         if (userFilterDto.email) where.email = userFilterDto.email;
 
-        const users = await this.customersView.find({ where });
+        const count = await this.customersView.count();
 
-        const results = sortBy(getTransactionByPage(users, userFilterDto.page!), 'createdAt', 'desc');
+        const users = await this.customersView.find({
+            where,
+            order: { name: 'asc' },
+            skip: (userFilterDto.page! - 1) * constants.PAGE_LIMIT,
+            take: constants.PAGE_LIMIT,
+        });
 
-        const response = { page: userFilterDto.page, users: results };
+        const response = { page: userFilterDto.page, count, users };
 
         return response;
     }

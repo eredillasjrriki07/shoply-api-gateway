@@ -5,7 +5,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreatePromoDto } from './dto/create-promo.dto';
 import { UpdatePromoDto } from './dto/update-promo.dto';
 import { PromoFilterDto } from './dto/promo-filter.dto';
-import { getTransactionByPage, sortBy } from '@/common/util/helper';
+import { constants } from '@/common/util/constants';
 
 @Injectable()
 export class PromosService {
@@ -18,11 +18,14 @@ export class PromosService {
         const where: FindOptionsWhere<Promo> = {};
         if (promoFilterDto.code) where.code = promoFilterDto.code;
 
-        const promos = await this.promoRepo.find({ where });
+        const promos = await this.promoRepo.find({
+            where,
+            order: { code: 'asc' },
+            skip: (promoFilterDto.page! - 1) * constants.PAGE_LIMIT,
+            take: constants.PAGE_LIMIT,
+        });
 
-        const results = sortBy(getTransactionByPage(promos, promoFilterDto.page!), 'code', 'asc');
-
-        const response = { page: promoFilterDto.page, promos: results };
+        const response = { page: promoFilterDto.page, promos };
 
         return response;
     }
