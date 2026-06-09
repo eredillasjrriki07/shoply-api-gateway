@@ -4,7 +4,7 @@ import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
 import { OrderShippingAddress } from "@/modules/orders/entities/order-shipping-address.entity";
 import { OrderTimelineEvent } from "@/modules/orders/entities/order-timeline-events.entity";
 import { Promo } from "@/modules/promos/promo.entity";
-import { User } from "@/modules/users/user.entity";
+import { User } from "@/modules/users/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("order")

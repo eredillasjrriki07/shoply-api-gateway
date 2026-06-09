@@ -20,7 +20,7 @@ export class OrderWithAggregates {
     @ViewColumn()
     date: Date;
 
-    @ViewColumn()
+    @ViewColumn({ name: 'total_items' })
     items: number;
 
     @ViewColumn()

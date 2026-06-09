@@ -1,7 +1,7 @@
 import { BaseEntity } from "@/common/entities/base.entity";
 import { OrderItem } from "@/modules/orders/entities/order-item.entity";
 import { Product } from "@/modules/products/entities/product.entity";
-import { User } from "@/modules/users/user.entity";
+import { User } from "@/modules/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, Unique } from "typeorm";
 
 @Entity('review')

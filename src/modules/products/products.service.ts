@@ -1,4 +1,4 @@
-import { STATUS_FILTERS } from '@/common/util/helper';
+import { getTransactionByPage, sortBy, STATUS_FILTERS } from '@/common/util/helper';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ProductFilterDto } from '@/modules/products/dto/product-filter.dto';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
@@ -31,7 +31,7 @@ export class ProductsService {
 
         const result = await this.productsView.find({ where });
 
-        const products = this.getTransactionByPage(result, productFilterDto.page!);
+        const products = sortBy(getTransactionByPage(result, productFilterDto.page!), 'name', 'asc');
 
         const response = { page: productFilterDto.page, products };
 
@@ -115,10 +115,5 @@ export class ProductsService {
         return this.productRepo.findOneBy({ id });
     }
 
-    private getTransactionByPage(data, page: number) {
-        const pageLimit = 10;
-        let start = (page - 1) * pageLimit;
-        let end = start + pageLimit;
-        return data.slice(start, end);
-    }
+
 }

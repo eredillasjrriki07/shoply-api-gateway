@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from './modules/users/users.module';
-import { User } from "./modules/users/user.entity";
+import { User } from "./modules/users/entities/user.entity";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ProductsModule } from './modules/products/products.module';
@@ -23,6 +23,7 @@ import { StripeModule } from './modules/stripe/stripe.module';
 import { StripeController } from './modules/stripe/stripe.controller';
 import { PromosModule } from './modules/promos/promos.module';
 import { Promo } from "./modules/promos/promo.entity";
+import { CustomersView } from "./modules/users/entities/customers.view";
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { Promo } from "./modules/promos/promo.entity";
         database: config.get<string>("DATABASE_NAME"),
         entities: [
           User,
+          CustomersView,
           Product,
           ProductSize,
           ProductColor,
