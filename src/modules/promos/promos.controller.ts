@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { PromosService } from './promos.service';
 import { CreatePromoDto } from './dto/create-promo.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { UpdatePromoDto } from './dto/update-promo.dto';
+import { PromoFilterDto } from './dto/promo-filter.dto';
 
 @Controller('promos')
 @UseGuards(JwtAuthGuard)
@@ -13,8 +14,8 @@ export class PromosController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async get(){
-        return await this.promoService.getAll();
+    async get(@Query() promotFilterDto: PromoFilterDto) {
+        return await this.promoService.getAll(promotFilterDto);
     }
 
     @Post('create')

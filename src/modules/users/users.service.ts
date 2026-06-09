@@ -1,16 +1,36 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import * as bcrypt from "bcrypt";
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserFilterDto } from './dto/user-filter.dto';
+import { getTransactionByPage, sortBy } from '@/common/util/helper';
+import { CustomersView } from './entities/customers.view';
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
-        private readonly userRepo: Repository<User>
+        private readonly userRepo: Repository<User>,
+        @InjectRepository(CustomersView)
+        private readonly customersView: Repository<CustomersView>
     ) { }
+
+    async getAll(userFilterDto: UserFilterDto) {
+
+        const where: FindOptionsWhere<CustomersView> = {};
+
+        if (userFilterDto.email) where.email = userFilterDto.email;
+
+        const users = await this.customersView.find({ where });
+
+        const results = sortBy(getTransactionByPage(users, userFilterDto.page!), 'createdAt', 'desc');
+
+        const response = { page: userFilterDto.page, users: results };
+
+        return response;
+    }
 
     async createUser(createUserDto: CreateUserDto) {
         const passwordHash = await bcrypt.hash(createUserDto.password, 12);
@@ -38,7 +58,14 @@ export class UsersService {
     async findById(id: string) {
         const user = await this.userRepo.findOne({
             where: { id },
-            relations: { orders: true, reviews: true }
+            relations: {
+                orders: true,
+                reviews: true
+            },
+            order: {
+                orders: { createdAt: 'desc' },
+                reviews: { createdAt: 'desc' },
+            },
         });
 
         if (!user) throw new NotFoundException(`User with id ${id} not found.`);

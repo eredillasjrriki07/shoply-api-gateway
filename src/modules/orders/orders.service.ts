@@ -2,7 +2,7 @@ import { OrderEventType } from '@/common/enums/order-event-type.enum';
 import { OrderStatus } from '@/common/enums/order-status.enum';
 import { PaymentStatus } from '@/common/enums/payment-status.enum';
 import { filterByDateRange } from '@/common/util/filter-by-date-range.util';
-import { getTransactionByPage, statusMap } from '@/common/util/helper';
+import { getSumAndCount, getTransactionByPage, sortBy, statusMap } from '@/common/util/helper';
 import { CreateOrderDto } from '@/modules/orders/dto/create-order.dto';
 import { OrderFilterDto } from '@/modules/orders/dto/order-filter.dto';
 import { OrderItem } from '@/modules/orders/entities/order-item.entity';
@@ -37,9 +37,15 @@ export class OrdersService {
 
         const orderViewResults = await this.orderView.find({ where });
 
-        const orders = getTransactionByPage(orderViewResults, orderFilterDto.page!);
+        let sumAndCount = getSumAndCount(orderViewResults);
 
-        return { page: orderFilterDto.page, orders };
+        const orders = sortBy(getTransactionByPage(orderViewResults, orderFilterDto.page!), 'date');
+
+        return {
+            page: orderFilterDto.page,
+            ...sumAndCount,
+            orders
+        };
     }
 
     async getOrder(orderNumber: string) {

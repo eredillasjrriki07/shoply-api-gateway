@@ -24,3 +24,22 @@ export const getTransactionByPage = (data, page: number) => {
     let end = start + pageLimit;
     return data.slice(start, end);
 }
+
+export const sortBy = <T>(data: T[], field: keyof T, order: 'asc' | 'desc' = 'desc') => {
+    return [...data].sort((a, b) => {
+        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
+        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+export const getSumAndCount = (data) => {
+    const sum = Number(data.reduce((acc, currValue) => acc + currValue.total, 0));
+    let count = data.length;
+    return { sum, count };
+}
+
+export const numericTransformer = {
+    from: (value: string | number): number => Number(value),
+    to: (value: number): number => value,
+};
