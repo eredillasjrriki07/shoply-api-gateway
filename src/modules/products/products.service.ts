@@ -44,7 +44,7 @@ export class ProductsService {
             relations: {
                 sizes: true,
                 colors: true,
-                productVariants: true,
+                productVariants: true
             },
         });
 

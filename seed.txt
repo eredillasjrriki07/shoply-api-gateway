@@ -1,0 +1,74 @@
+DROP DATABASE shoply;
+CREATE DATABASE shoply CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE shoply;
+START TRANSACTION;
+INSERT INTO `user` (id, email, password_hash, first_name, last_name, role, is_active) VALUES 
+(UUID(), 'admin@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Admin', 'User', 'ADMIN', TRUE),
+(UUID(), 'omd_dm@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Divine', 'Omadto', 'CUSTOMER', TRUE),
+(UUID(), 'denzduls@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Denz', 'Duls', 'CUSTOMER', TRUE),
+(UUID(), 'johnneck@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'John', 'Neck', 'CUSTOMER', TRUE),
+(UUID(), 'cjdums@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Cj', 'Dums', 'CUSTOMER', TRUE),
+(UUID(), 'frankkirbs@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Kirbs', 'Gorgonayo', 'CUSTOMER', TRUE),
+(UUID(), 'marqbeland@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Marq', 'Belandres', 'CUSTOMER', TRUE),
+(UUID(), 'marvinmaje@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Marvin', 'Majestrado', 'CUSTOMER', TRUE),
+(UUID(), 'johndoe@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'John', 'Doe', 'CUSTOMER', TRUE),
+(UUID(), 'mjackson@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Michael', 'Jackson', 'CUSTOMER', TRUE),
+(UUID(), 'bill@shoply.com', '$2b$12$8b6LEpIx47Wq3gWZzUD9Nu2t2wxragUUnSLv8xStndRWsYHKrE09u', 'Pipe', 'Bomb', 'CUSTOMER', TRUE);
+
+-- ─── 1. Classic Tee — 3 sizes × 3 colors = 9 variants ───
+INSERT INTO product (id, name, image_url, category, price, old_price, description, is_active)
+VALUES (
+  '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba',
+  'Classic Tee', '/img/classic-tee.jpg', 'Apparel',
+  24.00, 30.00, 'Soft 100% cotton tee, pre-shrunk. A wardrobe staple.', TRUE
+);
+
+INSERT INTO product_size (id, product_id, value) VALUES
+  ('0b87b99a-0785-48b7-a787-c224558811b6', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'S'),
+  ('ead0c313-df8c-4309-bf94-67511735038c', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'M'),
+  ('81dcbf12-3e9b-492f-b2fc-53c75f2e5072', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'L');
+
+INSERT INTO product_color (id, product_id, value) VALUES
+  ('5385c485-6c81-4707-bdc0-1080c84e8731', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'Black'),
+  ('246ee29b-64f1-4be6-b6ae-1b9829df1d3f', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'White'),
+  ('9240aad9-62b1-4291-b074-e88bc3f5375b', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'Navy');
+
+INSERT INTO product_variant (id, product_id, sku, size, color, price_override, stocks) VALUES
+  ('5f9bf29a-3927-47ca-bde3-480e1cd38043', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-S-BLK', 'S', 'Black', NULL,  5),
+  ('0acc8376-522c-4fc3-94aa-012b337db9d9', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-S-WHT', 'S', 'White', NULL,  3),
+  ('2824180b-0bb0-4e8e-87ac-ff14a85d4c36', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-S-NVY', 'S', 'Navy',  NULL,  0),
+  ('e7056a81-eba6-44f1-970c-d207953dbf21', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-M-BLK', 'M', 'Black', NULL,  8),
+  ('15477f39-6353-4e9d-b50f-6a8792290e03', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-M-WHT', 'M', 'White', NULL,  6),
+  ('47af6bce-61c9-4ddb-aabd-949309bb5839', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-M-NVY', 'M', 'Navy',  NULL,  2),
+  ('13f5e27c-13fe-4025-a676-6b99de4e789c', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-L-BLK', 'L', 'Black', NULL,  4),
+  ('59f36af7-5ec4-4b86-ab14-ffa6f9c2863b', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-L-WHT', 'L', 'White', NULL,  1),
+  ('94163500-034f-4df8-b0da-7f17a33bcaf4', '925d00ba-e147-4d7b-99bd-9fff7fc7e0ba', 'TEE-L-NVY', 'L', 'Navy',  28.00, 0);
+
+-- ─── 2. Ceramic Mug — 2 colors, no sizes ───
+INSERT INTO product (id, name, image_url, category, price, old_price, description, is_active)
+VALUES (
+  'f92b506f-b0d3-4db3-87cd-274da5db8177',
+  'Ceramic Mug', '/img/ceramic-mug.jpg', 'Home',
+  14.00, NULL, '12oz ceramic mug with matte finish. Dishwasher safe.', TRUE
+);
+
+INSERT INTO product_color (id, product_id, value) VALUES
+  ('034aaf2c-8ada-4778-a412-5ec39a0a32b9', 'f92b506f-b0d3-4db3-87cd-274da5db8177', 'White'),
+  ('c7dca03d-3329-445c-9eaf-fe853594e30c', 'f92b506f-b0d3-4db3-87cd-274da5db8177', 'Blue');
+
+INSERT INTO product_variant (id, product_id, sku, size, color, price_override, stocks) VALUES
+  ('c230b9af-c710-4dae-9467-5153662bd017', 'f92b506f-b0d3-4db3-87cd-274da5db8177', 'MUG-WHT', NULL, 'White', NULL, 30),
+  ('72054ab9-09bd-4d30-9ac5-af6b0e1b20d0', 'f92b506f-b0d3-4db3-87cd-274da5db8177', 'MUG-BLU', NULL, 'Blue',  NULL, 12);
+
+-- ─── 3. Wall Clock — no variation, single variant ───
+INSERT INTO product (id, name, image_url, category, price, old_price, description, is_active)
+VALUES (
+  'a2c3e904-b64b-4fa5-b7a5-830672447ce0',
+  'Wall Clock', '/img/wall-clock.jpg', 'Home',
+  34.00, NULL, 'Minimalist 10-inch wall clock. Silent quartz movement.', TRUE
+);
+
+INSERT INTO product_variant (id, product_id, sku, size, color, price_override, stocks) VALUES
+  ('69e3a9d7-0451-4a5c-a398-5a806bba55ac', 'a2c3e904-b64b-4fa5-b7a5-830672447ce0', 'CLOCK-001', NULL, NULL, NULL, 12);
+
+COMMIT;
