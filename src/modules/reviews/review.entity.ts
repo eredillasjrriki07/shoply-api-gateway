@@ -5,7 +5,7 @@ import { User } from "@/modules/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, Unique } from "typeorm";
 
 @Entity('review')
-@Unique(['userId', 'productId'])
+@Unique(['userId', 'orderItemId'])
 export class Review extends BaseEntity {
     @Column({
         name: 'user_id',
