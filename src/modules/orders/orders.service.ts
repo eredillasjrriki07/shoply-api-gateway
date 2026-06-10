@@ -16,7 +16,7 @@ import { ProductVariant } from '@/modules/products/entities/product-variant.enti
 import { StripeService } from '@/modules/stripe/stripe.service';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindOptionsWhere, In, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Repository } from 'typeorm';
 
 @Injectable()
 export class OrdersService {
@@ -66,6 +66,43 @@ export class OrdersService {
         }
 
         return order;
+    }
+
+    async getOrderCount(date: Date) {
+        return await this.orderRepo.count({
+            where: { createdAt: MoreThanOrEqual(date) }
+        });
+    }
+
+    async getRevenue(date: Date) {
+        const { revenue } = await this.orderView
+            .createQueryBuilder('o')
+            .select('SUM(o.total)', 'revenue')
+            .where('o.date >= :date', { date })
+            .getRawOne();
+
+        let revenueDataPoints = (await this.orderView
+            .createQueryBuilder('o')
+            .select("DATE_FORMAT(o.date, '%b %e')", 'date')
+            .addSelect('SUM(o.total)', 'revenue')
+            .where('o.date >= :date', { date })
+            .groupBy("DATE_FORMAT(o.date, '%b %e')")
+            .orderBy('MIN(o.date)', 'ASC')
+            .getRawMany()).map((dataPoint) => ({ ...dataPoint, revenue: Number(dataPoint.revenue) }));
+
+        return { revenue: Number(revenue), revenueDataPoints };
+    }
+
+    async getOrderStatusCounts(date: Date) {
+        const statusCounts = (await this.orderView
+            .createQueryBuilder('o')
+            .select('o.status', 'status')
+            .addSelect('COUNT(o.id)', 'count')
+            .where('o.date >= :date', { date })
+            .groupBy('o.status')
+            .getRawMany()).map((statusCount) => ({ ...statusCount, count: Number(statusCount.count) }));
+
+        return statusCounts;
     }
 
     async createOrder(createOrderDto: CreateOrderDto) {

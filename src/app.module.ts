@@ -24,6 +24,7 @@ import { StripeController } from './modules/stripe/stripe.controller';
 import { PromosModule } from './modules/promos/promos.module';
 import { Promo } from "./modules/promos/promo.entity";
 import { CustomersView } from "./modules/users/entities/customers.view";
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { CustomersView } from "./modules/users/entities/customers.view";
     ReviewsModule,
     StripeModule.forRoot(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-05-27.dahlia' }),
     PromosModule,
+    DashboardModule,
   ],
   controllers: [StripeController],
 })

@@ -1,13 +1,7 @@
-import { Type } from "class-transformer";
-import { IsInt, IsNotEmpty, IsOptional, IsUUID, Min } from "class-validator";
+import { BaseFilterDto } from "@/common/entities/base.dto";
+import { IsNotEmpty, IsOptional, IsUUID } from "class-validator";
 
-export class ReviewFilterDto {
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    page?: number = 1;
-
+export class ReviewFilterDto extends BaseFilterDto {
     @IsNotEmpty()
     @IsUUID()
     productId: string;
