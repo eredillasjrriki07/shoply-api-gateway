@@ -1,5 +1,6 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
+import { ReviewFilterDto } from './dto/review-filter.dto';
 
 @Controller('reviews')
 export class ReviewsController {
@@ -7,9 +8,15 @@ export class ReviewsController {
         private readonly reviewService: ReviewsService
     ) { }
 
-    @Get('product/:productId')
+    @Get('product/summary/:productId')
     @HttpCode(HttpStatus.OK)
-    async getProductReviews(@Param('productId', ParseUUIDPipe) productId: string) {
-        return await this.reviewService.getProductReviews(productId);
+    async getProductReviewSummary(@Param('productId', ParseUUIDPipe) productId: string) {
+        return await this.reviewService.getProductReviewSummary(productId);
+    }
+
+    @Get('product')
+    @HttpCode(HttpStatus.OK)
+    async getAllProductReviews(@Query() reviewFilterDto: ReviewFilterDto) {
+        return await this.reviewService.getAllProductReviews(reviewFilterDto);
     }
 }
