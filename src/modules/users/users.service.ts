@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { CustomersView } from './entities/customers.view';
 import { constants } from '@/common/util/constants';
+import { UserRole } from '@/common/enums/roles.enum';
 @Injectable()
 export class UsersService {
     constructor(
@@ -84,5 +85,13 @@ export class UsersService {
 
     async updateLastLogin(id: string) {
         return this.userRepo.update(id, { lastLoginAt: new Date() });
+    }
+
+    async getCustomerCount() {
+        const customerCount = await this.userRepo.count({
+            where: { role: UserRole.CUSTOMER }
+        });
+
+        return customerCount;
     }
 }

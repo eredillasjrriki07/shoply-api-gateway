@@ -1,13 +1,7 @@
-import { Type } from "class-transformer";
-import { IsEmail, IsInt, IsOptional, Min } from "class-validator";
+import { BaseFilterDto } from "@/common/entities/base.dto";
+import { IsEmail, IsOptional } from "class-validator";
 
-export class UserFilterDto {
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    page?: number = 1;
-
+export class UserFilterDto extends BaseFilterDto {
     @IsOptional()
     @IsEmail()
     email: string;

@@ -119,5 +119,22 @@ export class ProductsService {
         return this.productRepo.findOneBy({ id });
     }
 
+    async getProductCount() {
+        return await this.productRepo.count();
+    }
 
+    async getTopProducts(date: Date) {
+        const topProducts = (await this.productRepo
+            .createQueryBuilder('p')
+            .select('p.name', 'name')
+            .addSelect('COALESCE(SUM(oi.quantity), 0)', 'sold')
+            .leftJoin('product_variant', 'pv', 'pv.product_id = p.id')
+            .leftJoin('order_item', 'oi', 'oi.variant_id = pv.id AND oi.created_at >= :date', { date })
+            .groupBy('p.id')
+            .orderBy('sold', 'DESC')
+            .limit(5)
+            .getRawMany()).map(topProduct => ({ ...topProduct, sold: Number(topProduct.sold) }));
+
+        return topProducts;
+    }
 }
