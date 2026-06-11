@@ -1,6 +1,6 @@
 export enum ProductStatus {
-    ALL = 'all',
-    IN_STOCK = 'InStock',
+    ALL = 'All',
+    IN_STOCK = 'In stock',
     LOW = 'Low',
-    OUT_OF_STOCK = 'OutOfStock'
+    OUT_OF_STOCK = 'Out of stock'
 }

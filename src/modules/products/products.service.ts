@@ -10,14 +10,18 @@ import { ProductWithAggregates } from '@/modules/products/entities/product-with-
 import { Product } from '@/modules/products/entities/product.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, LessThanOrEqual, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
+import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { ProductStatus } from '@/common/enums/product-status.enum';
 
 @Injectable()
 export class ProductsService {
     constructor(
         @InjectRepository(Product)
         private readonly productRepo: Repository<Product>,
+        @InjectRepository(ProductVariant)
+        private readonly productVariantRepo: Repository<ProductVariant>,
         @InjectRepository(ProductWithAggregates)
         private readonly productsView: Repository<ProductWithAggregates>,
         private readonly dataSource: DataSource
@@ -136,5 +140,49 @@ export class ProductsService {
             .getRawMany()).map(topProduct => ({ ...topProduct, sold: Number(topProduct.sold) }));
 
         return topProducts;
+    }
+
+    async getInventoryStats() {
+        const inventory = await this.productsView
+            .createQueryBuilder('p')
+            .select('COUNT(p.id)', 'products')
+            .addSelect('COALESCE(SUM(p.total_stock), 0)', 'totalUnits')
+            .addSelect('SUM(CASE WHEN p.total_stock > 0 AND p.total_stock <= 3 THEN 1 ELSE 0 END)', 'lowStock')
+            .addSelect('SUM(CASE WHEN p.total_stock = 0 THEN 1 ELSE 0 END)', 'outOfStock')
+            .getRawOne();
+
+        // Parsing result to number 
+        const response = Object.fromEntries(
+            Object.entries(inventory).map(([k, v]) => [k, Number(v)])
+        );
+
+        return response;
+    }
+
+    async updateProductVariant(id: string, updateProductVariantDto: UpdateProductVariantDto) {
+        const result = await this.productVariantRepo.update(id, updateProductVariantDto);
+
+        if (result.affected === 0) {
+            throw new NotFoundException(`Product with id ${id} not found.`);
+        }
+
+        return this.productVariantRepo.findOneBy({ id });
+    }
+
+    async getLowAndOutOfStockProducts() {
+        const products = (await this.productsView.find({
+            where: [
+                { totalStock: LessThanOrEqual(5) },
+                { totalStock: 0 }
+            ],
+            select: {
+                id: true,
+                name: true,
+                category: true,
+                totalStock: true,
+            },
+        })).map(product => ({ ...product, status: product.totalStock === 0 ? ProductStatus.OUT_OF_STOCK : ProductStatus.LOW }));
+
+        return products;
     }
 }
