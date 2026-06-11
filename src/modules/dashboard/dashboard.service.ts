@@ -43,6 +43,13 @@ export class DashboardService {
 
         // Get top 5 products
         const topProducts = await this.productService.getTopProducts(date);
+
+        // Get recent orders
+        const recentOrders = await this.orderService.getRecentOrders();
+
+        // Get low and out of stocks products
+        const lowStockProducts = await this.productService.getLowAndOutOfStockProducts();
+
         return {
             products: productCount,
             orders: orderCount,
@@ -50,6 +57,8 @@ export class DashboardService {
             revenue,
             statusCounts,
             topProducts,
+            recentOrders,
+            lowStockProducts
         };
     }
 }

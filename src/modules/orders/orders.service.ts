@@ -68,6 +68,24 @@ export class OrdersService {
         return order;
     }
 
+    async getRecentOrders() {
+        const orders = await this.orderView.find({
+            order: { date: 'desc' },
+            take: 5,
+            select: {
+                id: true,
+                orderNumber: true,
+                customerName: true,
+                status: true,
+                date: true,
+                total: true,
+            },
+        });
+
+        return orders;
+    }
+
+
     async getOrderCount(date: Date) {
         return await this.orderRepo.count({
             where: { createdAt: MoreThanOrEqual(date) }

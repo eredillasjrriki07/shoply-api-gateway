@@ -1,3 +1,4 @@
+import { numericTransformer } from "@/common/util/helper";
 import { ViewColumn, ViewEntity } from "typeorm";
 
 @ViewEntity("products_with_aggregates")
@@ -11,11 +12,12 @@ export class ProductWithAggregates {
     @ViewColumn()
     category: string;
 
-    @ViewColumn()
+    @ViewColumn({ transformer: numericTransformer })
     price: number;
 
     @ViewColumn({
-        name: 'old_price'
+        name: 'old_price',
+        transformer: numericTransformer
     })
     oldPrice: number;
 
@@ -40,7 +42,8 @@ export class ProductWithAggregates {
     updatedAt: Date;
 
     @ViewColumn({
-        name: 'total_stock'
+        name: 'total_stock',
+        transformer: numericTransformer
     })
     totalStock: number;
 }

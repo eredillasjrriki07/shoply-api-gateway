@@ -1,4 +1,3 @@
-import { ProductDto } from "@/modules/products/dto/base/product.dto";
 import { Type } from "class-transformer";
 import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 
