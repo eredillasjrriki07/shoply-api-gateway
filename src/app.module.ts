@@ -25,6 +25,8 @@ import { PromosModule } from './modules/promos/promos.module';
 import { Promo } from "./modules/promos/promo.entity";
 import { CustomersView } from "./modules/users/entities/customers.view";
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { CartModule } from './modules/cart/cart.module';
+import { CartItem } from "./modules/cart/cart-item.entity";
 
 @Module({
   imports: [
@@ -53,7 +55,8 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
           OrderTimelineEvent,
           OrderWithAggregates,
           Review,
-          Promo
+          Promo,
+          CartItem
         ],
         synchronize: false, // never true in production — use migrations
         charset: "utf8mb4_unicode_ci",
@@ -67,6 +70,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     StripeModule.forRoot(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-05-27.dahlia' }),
     PromosModule,
     DashboardModule,
+    CartModule,
   ],
   controllers: [StripeController],
 })
