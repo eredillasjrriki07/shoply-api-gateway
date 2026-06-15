@@ -27,6 +27,8 @@ import { CustomersView } from "./modules/users/entities/customers.view";
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CartItem } from "./modules/cart/cart-item.entity";
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { WishlistItem } from "./modules/wishlist/wishlist-item.entity";
 
 @Module({
   imports: [
@@ -56,7 +58,8 @@ import { CartItem } from "./modules/cart/cart-item.entity";
           OrderWithAggregates,
           Review,
           Promo,
-          CartItem
+          CartItem,
+          WishlistItem
         ],
         synchronize: false, // never true in production — use migrations
         charset: "utf8mb4_unicode_ci",
@@ -71,6 +74,7 @@ import { CartItem } from "./modules/cart/cart-item.entity";
     PromosModule,
     DashboardModule,
     CartModule,
+    WishlistModule,
   ],
   controllers: [StripeController],
 })
