@@ -1,7 +1,7 @@
 import { PaymentStatus } from '@/common/enums/payment-status.enum';
 import { OrdersService } from '@/modules/orders/orders.service';
 import { StripeService } from '@/modules/stripe/stripe.service';
-import { Controller, Headers, Post, Req } from '@nestjs/common';
+import { Controller, Headers, Logger, Post, Req } from '@nestjs/common';
 
 @Controller('stripe')
 export class StripeController {
@@ -9,6 +9,8 @@ export class StripeController {
         private readonly stripeService: StripeService,
         private readonly orderService: OrdersService
     ) { }
+
+    private readonly logger = new Logger(StripeController.name);
 
     @Post('webhook')
     async handleWebhook(
@@ -34,6 +36,8 @@ export class StripeController {
                     paidAt: new Date()
                 }
             );
+
+            this.logger.log('Checkout session completed!');
         } else if (event.type === 'charge.refunded') {
 
             const charge = event.data.object as any;
@@ -47,6 +51,8 @@ export class StripeController {
                     amountRefunded: charge.amount_refunded / 100
                 }
             );
+
+            this.logger.log('Refund session completed!');
         }
 
         return { received: true }

@@ -33,6 +33,8 @@ export class AuthService {
             ...userWithoutPassword
         };
 
+        await this.usersService.updateLastLogin(user.id);
+
         this.logger.log(`Successfully logged in user! Email: ${email}`);
         return await this.jwtService.signAsync(payload);
     }

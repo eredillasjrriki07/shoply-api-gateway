@@ -1,5 +1,5 @@
 import { Review } from '@/modules/reviews/review.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReviewFilterDto } from './dto/review-filter.dto';
@@ -12,7 +12,11 @@ export class ReviewsService {
         private readonly reviewRepo: Repository<Review>
     ) { }
 
+    private readonly logger = new Logger(ReviewsService.name);
+
     async getProductReviewSummary(productId: string) {
+        this.logger.log(`Getting review summary for product with id ${productId}`);
+
         const summary = await this.reviewRepo
             .createQueryBuilder('r')
             .select('COUNT(r.id)', 'totalReviews')
@@ -27,6 +31,10 @@ export class ReviewsService {
             .where('r.productId = :productId', { productId })
             .getRawOne();
 
+        this.logger.log(`Found ${summary.totalReviews} reviews.`);
+
+        this.logger.log(`Getting latest review for product with id ${productId}`);
+
         const latestReview = await this.reviewRepo.findOne({
             where: { productId },
             order: { createdAt: 'desc' },
@@ -40,10 +48,15 @@ export class ReviewsService {
             },
         });
 
+        if (latestReview) {
+            this.logger.log(`Found latest review with id ${latestReview.id}`);
+        }
+
         return { summary, latestReview };
     }
 
     async getAllProductReviews(reviewFilterDto: ReviewFilterDto) {
+        this.logger.log(`Fetching all reviews for product with id ${reviewFilterDto.productId}`);
 
         const [reviews, total] = await this.reviewRepo.findAndCount({
             where: { productId: reviewFilterDto.productId },
@@ -60,23 +73,8 @@ export class ReviewsService {
             take: constants.PAGE_LIMIT,
         });
 
+        this.logger.log(`Found ${total} reviews.`);
+
         return { page: reviewFilterDto.page, count: total, reviews };
     }
-
-    // async getProductReviews(getReviewDto: ReviewFilterDto) {
-    //     const { productId, userId, orderItemId } = getReviewDto;
-    //     const where: FindOptionsWhere<Review> = { productId };
-
-    //     if (!!userId !== !!orderItemId) {
-    //         throw new BadRequestException('userId and orderItemId must be provided together.');
-    //     } else {
-    //         where.userId = userId;
-    //         where.orderItemId = orderItemId;
-    //     }
-
-    //     const reviews = await this.reviewRepo.find({ where });
-
-    //     return reviews;
-    // }
-
 }

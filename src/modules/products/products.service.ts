@@ -8,7 +8,7 @@ import { ProductSize } from '@/modules/products/entities/product-size.entity';
 import { ProductVariant } from '@/modules/products/entities/product-variant.entity';
 import { ProductWithAggregates } from '@/modules/products/entities/product-with-aggregates.view';
 import { Product } from '@/modules/products/entities/product.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, LessThanOrEqual, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
@@ -27,12 +27,16 @@ export class ProductsService {
         private readonly dataSource: DataSource
     ) { }
 
+    private readonly logger = new Logger(ProductsService.name);
+
     async getAllProducts(productFilterDto: ProductFilterDto) {
 
         const where: FindOptionsWhere<ProductWithAggregates> = {};
         if (productFilterDto.name) where.name = productFilterDto.name;
         if (productFilterDto.category) where.category = productFilterDto.category;
         if (productFilterDto.status) where.totalStock = STATUS_FILTERS[productFilterDto.status]
+
+        this.logger.log(`Fetching products with filter ${JSON.stringify(where)}`);
 
         const products = await this.productsView.find({
             where,
@@ -41,12 +45,15 @@ export class ProductsService {
             take: constants.PAGE_LIMIT,
         });
 
+        this.logger.log(`Found ${products.length} products. Page ${productFilterDto.page}`);
+
         const response = { page: productFilterDto.page, products };
 
         return response;
     }
 
     async getProductWithId(id: string) {
+        this.logger.log(`Fetching product with id ${id}`);
         const product = await this.productRepo.findOne({
             where: { id },
             relations: {
@@ -57,14 +64,18 @@ export class ProductsService {
         });
 
         if (!product) {
+            this.logger.warn(`Product with id ${id} not found!`);
             throw new NotFoundException(`Product with id ${id} not found!`);
         }
+
+        this.logger.log(`Fetched product ${id}`);
 
         return product;
     }
 
     async createProduct(createProductDto: CreateProductDto) {
-        const createdProduct = this.dataSource.transaction(async (manager) => {
+        return this.dataSource.transaction(async (manager) => {
+            this.logger.log('Inserting to product table');
             // Inserting to product table
             const product = await manager.save(Product, {
                 name: createProductDto.name,
@@ -78,6 +89,7 @@ export class ProductsService {
 
             // Inserting to product_size table
             if (createProductDto.sizes?.length) {
+                this.logger.log('Inserting to product_size table');
                 await manager.save(
                     ProductSize,
                     createProductDto.sizes.map((size) => ({ productId: product.id, value: size.value }))
@@ -86,6 +98,7 @@ export class ProductsService {
 
             // Inserting to product_color table
             if (createProductDto.colors?.length) {
+                this.logger.log('Inserting to product_color table');
                 await manager.save(
                     ProductColor,
                     createProductDto.colors.map((color) => ({ productId: product.id, value: color.value }))
@@ -94,6 +107,7 @@ export class ProductsService {
 
             // Inserting to product_variant table
             if (createProductDto.variants?.length) {
+                this.logger.log('Inserting to product_variant table');
                 await manager.save(
                     ProductVariant,
                     createProductDto.variants.map((variant) => ({
@@ -107,20 +121,27 @@ export class ProductsService {
                 );
             }
 
+            this.logger.log(`Successfully created product ${product.id}`);
+
             return product;
         });
-
-        return createdProduct;
     }
 
     async updateProduct(id: string, updateProductDto: UpdateProductDto) {
+        this.logger.log(`Updating product ${id}`);
+
         const result = await this.productRepo.update(id, updateProductDto);
 
         if (result.affected === 0) {
+            this.logger.warn(`Product with id ${id} not found.`);
             throw new NotFoundException(`Product with id ${id} not found.`);
         }
 
-        return this.productRepo.findOneBy({ id });
+        const updated = await this.productRepo.findOneBy({ id });
+
+        this.logger.log(`Successfully updated product ${updated!.id}`);
+
+        return updated;
     }
 
     async getProductCount() {
@@ -160,13 +181,20 @@ export class ProductsService {
     }
 
     async updateProductVariant(id: string, updateProductVariantDto: UpdateProductVariantDto) {
+        this.logger.log(`Updating product variant with id ${id}`);
+
         const result = await this.productVariantRepo.update(id, updateProductVariantDto);
 
         if (result.affected === 0) {
-            throw new NotFoundException(`Product with id ${id} not found.`);
+            this.logger.warn(`Product variant with id ${id} not found.`);
+            throw new NotFoundException(`Product variant with id ${id} not found.`);
         }
 
-        return this.productVariantRepo.findOneBy({ id });
+        const updated = await this.productVariantRepo.findOneBy({ id });
+
+        this.logger.log(`Successfully updated product variant with id ${updated!.id}`);
+
+        return updated;
     }
 
     async getLowAndOutOfStockProducts() {
