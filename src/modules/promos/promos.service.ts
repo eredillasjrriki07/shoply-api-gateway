@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Promo } from './promo.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
@@ -14,9 +14,13 @@ export class PromosService {
         private readonly promoRepo: Repository<Promo>
     ) { }
 
+    private readonly logger = new Logger(PromosService.name);
+
     async getAll(promoFilterDto: PromoFilterDto) {
         const where: FindOptionsWhere<Promo> = {};
         if (promoFilterDto.code) where.code = promoFilterDto.code;
+
+        this.logger.log(`Fetchiing promos with filter ${JSON.stringify(where)}`);
 
         const promos = await this.promoRepo.find({
             where,
@@ -25,32 +29,61 @@ export class PromosService {
             take: constants.PAGE_LIMIT,
         });
 
+        this.logger.log(`Found ${promos.length} promos. Page ${promoFilterDto.page}`);
+
         const response = { page: promoFilterDto.page, promos };
 
         return response;
     }
 
     async create(createPromoDto: CreatePromoDto) {
-        const newPromo = this.promoRepo.create(createPromoDto);
+        try {
+            this.logger.log(`Creating promo...`);
 
-        return await this.promoRepo.save(newPromo);
+            const newPromo = this.promoRepo.create(createPromoDto);
+
+            const savedNewPromo = await this.promoRepo.save(newPromo);
+
+            this.logger.log(`Successfully created promo with id ${savedNewPromo.id}`);
+
+            return savedNewPromo;
+        } catch (error) {
+            this.logger.error(JSON.stringify(error));
+            throw new InternalServerErrorException('Unknown error occured.');
+        }
     }
 
     async update(id: string, updatePromoDto: UpdatePromoDto) {
+        this.logger.log(`Updating promo with id ${id}`);
+
         const result = await this.promoRepo.update(id, updatePromoDto);
 
-        if (result.affected === 0) throw new NotFoundException(`Promo with id ${id} not found.`);
+        if (result.affected === 0) {
+            this.logger.warn(`Promo with id ${id} not found.`);
+            throw new NotFoundException(`Promo with id ${id} not found.`);
+        }
 
-        return this.promoRepo.findOneBy({ id });
+        const updated = await this.promoRepo.findOneBy({ id });
+
+        this.logger.log(`Successfully updated promo with id ${updated!.id}`);
+
+        return updated;
     }
 
     async getPromoWithId(id: string) {
+        this.logger.log(`Fetching promo with id ${id}`);
+
         const promo = await this.promoRepo.findOne({
             where: { id },
             relations: { orders: true }
         });
 
-        if (!promo) throw new NotFoundException(`Promo with id ${id} not found.`);
+        if (!promo) {
+            this.logger.warn(`Promo with id ${id} not found.`);
+            throw new NotFoundException(`Promo with id ${id} not found.`);
+        }
+
+        this.logger.log(`Fetched promo with id ${id}`);
 
         return promo;
     }

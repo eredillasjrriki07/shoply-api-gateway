@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WishlistItem } from './wishlist-item.entity';
 import { Repository } from 'typeorm';
@@ -13,7 +13,11 @@ export class WishlistService {
         private readonly productService: ProductsService
     ) { }
 
+    private readonly logger = new Logger(WishlistService.name);
+
     async getWishlistItems(userId: string) {
+        this.logger.log(`Fetching wishlist for user ${userId}`);
+
         const wishlistItems = await this.wishlistItemRepo.find({
             where: { userId },
             relations: { product: true },
@@ -27,24 +31,40 @@ export class WishlistService {
                 },
             }
         });
+
+        this.logger.log(`Found ${wishlistItems.length} wishlist items.`);
+
         return wishlistItems;
     }
 
     async createWishlistItem(createWishlistItemDto: CreateWishlistItemDto) {
-        // Check first if given product variant id exists
-        const { productId } = createWishlistItemDto;
+        const { productId, userId } = createWishlistItemDto;
 
+        this.logger.log(`Creating wishlist item for user ${userId} with product id ${productId}`);
+
+        // Check first if given product variant id exists
         const productExists = await this.productService.productExists(productId);
 
-        if (!productExists) throw new NotFoundException(`Product with id ${productId} not found!`);
+        if (!productExists) {
+            this.logger.warn(`Product with id ${productId} not found!`);
+            throw new NotFoundException(`Product with id ${productId} not found!`);
+        }
 
         const wishlistItem = this.wishlistItemRepo.create(createWishlistItemDto);
 
-        return await this.wishlistItemRepo.save(wishlistItem);
+        const savedWishlistItem = await this.wishlistItemRepo.save(wishlistItem);
+
+        this.logger.log(`Successfully created wishlist item with id ${savedWishlistItem.id}`);
+
+        return savedWishlistItem;
     }
 
     async removeWishlistItem(id: string) {
+        this.logger.log(`Removing wishlist item with id ${id}`);
         const result = await this.wishlistItemRepo.delete(id);
-        if (result.affected === 0) throw new NotFoundException('Wishlist item not found!');
+        if (result.affected === 0) {
+            this.logger.warn('Wishlist item not found!');
+            throw new NotFoundException('Wishlist item not found!');
+        }
     }
 }
