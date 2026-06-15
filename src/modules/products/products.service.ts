@@ -190,4 +190,9 @@ export class ProductsService {
         const exists = await this.productVariantRepo.exists({ where: { id } });
         return exists;
     }
+
+    async productExists(id: string) {
+        const exists = await this.productRepo.exists({ where: { id } });
+        return exists;
+    }
 }
