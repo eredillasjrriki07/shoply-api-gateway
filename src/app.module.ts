@@ -1,10 +1,45 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module } from "@nestjs/common";
+import { AuthModule } from "./modules/auth/auth.module";
+import { UsersModule } from './modules/users/users.module';
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { ProductsModule } from './modules/products/products.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { StripeModule } from './modules/stripe/stripe.module';
+import { StripeController } from './modules/stripe/stripe.controller';
+import { PromosModule } from './modules/promos/promos.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { CartModule } from './modules/cart/cart.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { databaseConfig } from "./common/config/database.config";
+import { LoggerModule } from "nestjs-pino";
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: databaseConfig,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: process.env.NODE_ENV !== 'production'
+          ? { target: 'pino-pretty', options: { colorize: true } }
+          : undefined,
+      },
+    }),
+    AuthModule,
+    UsersModule,
+    ProductsModule,
+    OrdersModule,
+    ReviewsModule,
+    StripeModule.forRoot(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-05-27.dahlia' }),
+    PromosModule,
+    DashboardModule,
+    CartModule,
+    WishlistModule,
+  ],
+  controllers: [StripeController],
 })
-export class AppModule {}
+export class AppModule { }
