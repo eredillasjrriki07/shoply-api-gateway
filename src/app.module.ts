@@ -14,6 +14,8 @@ import { CartModule } from './modules/cart/cart.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { databaseConfig } from "./common/config/database.config";
 import { LoggerModule } from "nestjs-pino";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
   imports: [
@@ -29,6 +31,10 @@ import { LoggerModule } from "nestjs-pino";
           : undefined,
       },
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 60,
+    }]),
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -41,5 +47,9 @@ import { LoggerModule } from "nestjs-pino";
     WishlistModule,
   ],
   controllers: [StripeController],
+  providers: [{
+    provide: APP_GUARD,
+    useClass: ThrottlerGuard,
+  }],
 })
 export class AppModule { }
