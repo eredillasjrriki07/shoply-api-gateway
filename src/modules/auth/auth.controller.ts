@@ -1,6 +1,7 @@
 import { AuthService } from '@/modules/auth/auth.service';
 import { LoginDTO } from '@/modules/auth/dto/login.dto';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -10,7 +11,14 @@ export class AuthController {
 
     @Post("login")
     @HttpCode(HttpStatus.OK)
-    async login(@Body() dto: LoginDTO){
-        return await this.authService.login(dto.email, dto.password);
+    async login(@Body() dto: LoginDTO, @Res({ passthrough: true }) res: Response) {
+        const result = await this.authService.login(dto.email, dto.password);
+        res.cookie('access_token', result.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 1000 * 60 * 60, // match your JWT exp
+        });
+        return result;
     }
 }
