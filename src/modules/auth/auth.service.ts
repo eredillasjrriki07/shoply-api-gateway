@@ -36,7 +36,10 @@ export class AuthService {
         await this.usersService.updateLastLogin(user.id);
 
         this.logger.log(`Successfully logged in user! Email: ${email}`);
-        return await this.jwtService.signAsync(payload);
+
+        const accessToken = await this.jwtService.signAsync(payload);
+
+        return { accessToken };
     }
 
 }
