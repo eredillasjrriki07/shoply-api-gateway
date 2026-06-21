@@ -12,7 +12,10 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   app.setGlobalPrefix('api');
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:5173', // your Vite dev origin — exact, no wildcard
+    credentials: true,
+  });
 
   app.use(cookieParser());
 
