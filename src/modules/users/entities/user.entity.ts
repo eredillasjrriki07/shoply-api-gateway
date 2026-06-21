@@ -12,7 +12,7 @@ export class User extends BaseEntity {
 
     @Column({
         name: "password_hash",
-        length: 255
+        length: 255,
     })
     passwordHash!: string;
 

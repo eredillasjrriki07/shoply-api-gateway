@@ -4,6 +4,7 @@ import { UsersService } from '@/modules/users/users.service';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
+import { CurrentUser } from '@/common/decorator/current-user.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -16,6 +17,12 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     async getAll(@Query() userFilterDto: UserFilterDto) {
         return await this.userService.getAll(userFilterDto);
+    }
+
+    @Get('me')
+    @HttpCode(HttpStatus.OK)
+    async me(@CurrentUser('sub') id: string) {
+        return await this.userService.findById(id);
     }
 
     @Post('create')

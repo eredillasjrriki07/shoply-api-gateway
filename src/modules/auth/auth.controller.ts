@@ -1,6 +1,6 @@
 import { AuthService } from '@/modules/auth/auth.service';
 import { LoginDTO } from '@/modules/auth/dto/login.dto';
-import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 
 @Controller('auth')
@@ -20,5 +20,11 @@ export class AuthController {
             maxAge: 1000 * 60 * 60, // match your JWT exp
         });
         return result;
+    }
+
+    @Post('logout')
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie('access_token');
+        return { ok: true };
     }
 }
