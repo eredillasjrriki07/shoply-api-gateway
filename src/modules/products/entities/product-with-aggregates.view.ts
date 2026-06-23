@@ -27,7 +27,8 @@ export class ProductWithAggregates {
     imageUrl: string | null;
 
     @ViewColumn({
-        name: 'is_active'
+        name: 'is_active',
+        transformer: { from: (v) => Boolean(v), to: (v) => v },
     })
     isActive: boolean;
 
@@ -46,4 +47,10 @@ export class ProductWithAggregates {
         transformer: numericTransformer
     })
     totalStock: number;
+
+    @ViewColumn({
+        name: 'avg_rating',
+        transformer: numericTransformer
+    })
+    rating: number;
 }
