@@ -10,7 +10,7 @@ import { ProductWithAggregates } from '@/modules/products/entities/product-with-
 import { Product } from '@/modules/products/entities/product.entity';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, LessThanOrEqual, Repository } from 'typeorm';
+import { FindOptionsWhere, LessThanOrEqual, Like, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { ProductStatus } from '@/common/enums/product-status.enum';
@@ -32,11 +32,13 @@ export class ProductsService {
     async getAllProducts(productFilterDto: ProductFilterDto) {
 
         const where: FindOptionsWhere<ProductWithAggregates> = {};
-        if (productFilterDto.name) where.name = productFilterDto.name;
+        if (productFilterDto.name) where.name = Like(`%${productFilterDto.name}%`);
         if (productFilterDto.category) where.category = productFilterDto.category;
         if (productFilterDto.status) where.totalStock = STATUS_FILTERS[productFilterDto.status]
 
         this.logger.log(`Fetching products with filter ${JSON.stringify(where)}`);
+
+        const productsCount = await this.productsView.count({ where });
 
         const products = await this.productsView.find({
             where,
@@ -47,7 +49,11 @@ export class ProductsService {
 
         this.logger.log(`Found ${products.length} products. Page ${productFilterDto.page}`);
 
-        const response = { page: productFilterDto.page, products };
+        const response = {
+            page: productFilterDto.page,
+            count: productsCount,
+            products
+        };
 
         return response;
     }

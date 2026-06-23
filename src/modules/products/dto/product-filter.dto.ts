@@ -5,7 +5,7 @@ import { IsEnum, IsOptional } from "class-validator";
 
 export class ProductFilterDto extends BaseFilterDto{ 
     @IsOptional()
-    name: string;
+    name?: string;
 
     @IsOptional()
     @IsEnum(ProductCategory)
