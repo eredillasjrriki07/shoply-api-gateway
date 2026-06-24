@@ -8,7 +8,7 @@ import { ProductSize } from '@/modules/products/entities/product-size.entity';
 import { ProductVariant } from '@/modules/products/entities/product-variant.entity';
 import { ProductWithAggregates } from '@/modules/products/entities/product-with-aggregates.view';
 import { Product } from '@/modules/products/entities/product.entity';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, LessThanOrEqual, Like, Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
@@ -42,7 +42,7 @@ export class ProductsService {
 
         const products = await this.productsView.find({
             where,
-            order: { createdAt: 'desc' },
+            order: { name: 'asc' },
             skip: (productFilterDto.page! - 1) * constants.PAGE_LIMIT,
             take: constants.PAGE_LIMIT,
         });
@@ -80,57 +80,68 @@ export class ProductsService {
     }
 
     async createProduct(createProductDto: CreateProductDto) {
-        return this.dataSource.transaction(async (manager) => {
-            this.logger.log('Inserting to product table');
-            // Inserting to product table
-            const product = await manager.save(Product, {
-                name: createProductDto.name,
-                imageUrl: createProductDto.imageUrl,
-                category: createProductDto.category,
-                price: createProductDto.price,
-                oldPrice: createProductDto.oldPrice,
-                description: createProductDto.description,
-                isActive: createProductDto.isActive,
+        try {
+
+            return await this.dataSource.transaction(async (manager) => {
+                this.logger.log('Inserting to product table');
+                // Inserting to product table
+                const product = await manager.save(Product, {
+                    name: createProductDto.name,
+                    imageUrl: createProductDto.imageUrl,
+                    category: createProductDto.category,
+                    price: createProductDto.price,
+                    oldPrice: createProductDto.oldPrice,
+                    description: createProductDto.description,
+                    isActive: createProductDto.isActive,
+                });
+
+                // Inserting to product_size table
+                if (createProductDto.sizes?.length) {
+                    this.logger.log('Inserting to product_size table');
+                    await manager.save(
+                        ProductSize,
+                        createProductDto.sizes.map((size) => ({ productId: product.id, value: size.value }))
+                    );
+                }
+
+                // Inserting to product_color table
+                if (createProductDto.colors?.length) {
+                    this.logger.log('Inserting to product_color table');
+                    await manager.save(
+                        ProductColor,
+                        createProductDto.colors.map((color) => ({ productId: product.id, value: color.value }))
+                    );
+                }
+
+                // Inserting to product_variant table
+                if (createProductDto.variants?.length) {
+                    this.logger.log('Inserting to product_variant table');
+                    await manager.save(
+                        ProductVariant,
+                        createProductDto.variants.map((variant) => ({
+                            productId: product.id,
+                            sku: variant.sku,
+                            size: variant.size,
+                            color: variant.color,
+                            priceOverride: variant.priceOverride,
+                            stocks: variant.stocks,
+                        }))
+                    );
+                }
+
+                this.logger.log(`Successfully created product ${product.id}`);
+
+                const newProduct = await manager.findOne(ProductWithAggregates, {
+                    where: { productId: product.id }
+                });
+
+                return newProduct;
             });
 
-            // Inserting to product_size table
-            if (createProductDto.sizes?.length) {
-                this.logger.log('Inserting to product_size table');
-                await manager.save(
-                    ProductSize,
-                    createProductDto.sizes.map((size) => ({ productId: product.id, value: size.value }))
-                );
-            }
-
-            // Inserting to product_color table
-            if (createProductDto.colors?.length) {
-                this.logger.log('Inserting to product_color table');
-                await manager.save(
-                    ProductColor,
-                    createProductDto.colors.map((color) => ({ productId: product.id, value: color.value }))
-                );
-            }
-
-            // Inserting to product_variant table
-            if (createProductDto.variants?.length) {
-                this.logger.log('Inserting to product_variant table');
-                await manager.save(
-                    ProductVariant,
-                    createProductDto.variants.map((variant) => ({
-                        productId: product.id,
-                        sku: variant.sku,
-                        size: variant.size,
-                        color: variant.color,
-                        priceOverride: variant.priceOverride,
-                        stocks: variant.stocks,
-                    }))
-                );
-            }
-
-            this.logger.log(`Successfully created product ${product.id}`);
-
-            return product;
-        });
+        } catch (error) {
+            this.logger.error(`Failed to create product: ${error.message}`, error.stack);
+            throw new InternalServerErrorException('Failed to create product');
+        }
     }
 
     async updateProduct(id: string, updateProductDto: UpdateProductDto) {
@@ -172,7 +183,7 @@ export class ProductsService {
     async getInventoryStats() {
         const inventory = await this.productsView
             .createQueryBuilder('p')
-            .select('COUNT(p.id)', 'products')
+            .select('COUNT(p.product_id)', 'products')
             .addSelect('COALESCE(SUM(p.total_stock), 0)', 'totalUnits')
             .addSelect('SUM(CASE WHEN p.total_stock > 0 AND p.total_stock <= 3 THEN 1 ELSE 0 END)', 'lowStock')
             .addSelect('SUM(CASE WHEN p.total_stock = 0 THEN 1 ELSE 0 END)', 'outOfStock')
@@ -210,7 +221,7 @@ export class ProductsService {
                 { totalStock: 0 }
             ],
             select: {
-                id: true,
+                productId: true,
                 name: true,
                 category: true,
                 totalStock: true,

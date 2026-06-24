@@ -3,8 +3,8 @@ import { ViewColumn, ViewEntity } from "typeorm";
 
 @ViewEntity("products_with_aggregates")
 export class ProductWithAggregates {
-    @ViewColumn()
-    id: string;
+    @ViewColumn({name: 'product_id'})
+    productId: string;
 
     @ViewColumn()
     name: string;
@@ -31,16 +31,6 @@ export class ProductWithAggregates {
         transformer: { from: (v) => Boolean(v), to: (v) => v },
     })
     isActive: boolean;
-
-    @ViewColumn({
-        name: 'created_at'
-    })
-    createdAt: Date;
-
-    @ViewColumn({
-        name: 'updated_at'
-    })
-    updatedAt: Date;
 
     @ViewColumn({
         name: 'total_stock',
