@@ -17,7 +17,7 @@ export class ReviewsService {
     async getProductReviewSummary(productId: string) {
         this.logger.log(`Getting review summary for product with id ${productId}`);
 
-        const summary = await this.reviewRepo
+        let summary = await this.reviewRepo
             .createQueryBuilder('r')
             .select('COUNT(r.id)', 'totalReviews')
             .addSelect('AVG(r.rating)', 'averageRating')
@@ -51,6 +51,11 @@ export class ReviewsService {
         if (latestReview) {
             this.logger.log(`Found latest review with id ${latestReview.id}`);
         }
+
+        // Converting all values to number
+        summary = Object.fromEntries(
+            Object.entries(summary ?? {}).map(([key, value]) => [key, Number(value)]),
+        );
 
         return { summary, latestReview };
     }
