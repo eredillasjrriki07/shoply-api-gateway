@@ -34,36 +34,43 @@ export class OrdersController {
 
     // Order events
     @Post(':orderId/to-ship')
+    @HttpCode(HttpStatus.OK)
     async toShip(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.updateOrderTimeline(orderId, OrderEventType.TO_SHIP);
     }
 
     @Post(':orderId/cancelled')
+    @HttpCode(HttpStatus.OK)
     async cancel(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.updateOrderTimeline(orderId, OrderEventType.CANCELLED);
     }
 
     @Post(':orderId/shipped')
+    @HttpCode(HttpStatus.OK)
     async ship(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.updateOrderTimeline(orderId, OrderEventType.SHIPPED);
     }
 
     @Post(':orderId/delivered')
+    @HttpCode(HttpStatus.OK)
     async deliver(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.updateOrderTimeline(orderId, OrderEventType.DELIVERED);
     }
 
     @Post(':orderId/return')
+    @HttpCode(HttpStatus.OK)
     async return(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.updateOrderTimeline(orderId, OrderEventType.RETURN_REFUND);
     }
 
     @Post('checkout/:orderId')
+    @HttpCode(HttpStatus.OK)
     async checkout(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.checkout(orderId);
     }
 
     @Post('refund/:orderId')
+    @HttpCode(HttpStatus.OK)
     async refund(@Param('orderId', ParseIntPipe) orderId: number) {
         return await this.orderService.refund(orderId);
     }
