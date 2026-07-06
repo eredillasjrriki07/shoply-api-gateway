@@ -93,11 +93,9 @@ export class UsersService {
             where: { id },
             relations: {
                 orders: true,
-                reviews: true
             },
             order: {
                 orders: { createdAt: 'desc' },
-                reviews: { createdAt: 'desc' },
             },
         });
 
@@ -106,9 +104,17 @@ export class UsersService {
             throw new NotFoundException(`User with id ${id} not found.`);
         }
 
+        const orderCount = user.orders.length;
+
+        const totalSpent = user.orders.reduce((acc, curr) => acc + curr.total, 0);
+
         this.logger.log(`Fetched user with id ${id}`);
 
-        return user;
+        return {
+            ...user,
+            orderCount,
+            totalSpent
+        };
     }
 
     async findByEmail(email: string) {

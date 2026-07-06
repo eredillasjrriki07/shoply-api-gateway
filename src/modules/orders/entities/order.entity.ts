@@ -1,4 +1,5 @@
 import { OrderStatus } from "@/common/enums/order-status.enum";
+import { numericTransformer } from "@/common/util/helper";
 import { OrderItem } from "@/modules/orders/entities/order-item.entity";
 import { OrderPayment } from "@/modules/orders/entities/order-payment.entity";
 import { OrderShippingAddress } from "@/modules/orders/entities/order-shipping-address.entity";
@@ -39,6 +40,7 @@ export class Order {
         type: 'decimal',
         precision: 10,
         scale: 2,
+        transformer: numericTransformer,
     })
     subtotal: number;
 
@@ -47,6 +49,7 @@ export class Order {
         type: 'decimal',
         precision: 10,
         scale: 2,
+        transformer: numericTransformer,
     })
     shippingFee: number;
 
@@ -54,6 +57,7 @@ export class Order {
         type: 'decimal',
         precision: 10,
         scale: 2,
+        transformer: numericTransformer,
     })
     tax: number;
 
@@ -69,7 +73,8 @@ export class Order {
         precision: 10,
         scale: 2,
         generatedType: "STORED",
-        asExpression: "subtotal + shipping_fee + tax"
+        asExpression: "subtotal + shipping_fee + tax",
+        transformer: numericTransformer, 
     })
     total: number;
 
