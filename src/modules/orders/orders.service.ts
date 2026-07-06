@@ -65,7 +65,20 @@ export class OrdersService {
 
         const order = await this.orderRepo.findOne({
             where: { orderNumber },
-            relations: { orderItems: true, orderShippingAddress: true, orderPayment: true, orderTimelineEvents: true }
+            relations: { user: true, orderItems: true, orderShippingAddress: true, orderPayment: true, orderTimelineEvents: true },
+            select: {
+                user: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    createdAt: true,
+                }
+            },
+            order: {
+                orderTimelineEvents: {
+                    createdAt: 'ASC',
+                },
+            },
         });
 
         if (!order) {
